@@ -186,6 +186,17 @@ a{color:var(--red-dark)}
 .sheet .grab{width:40px;height:5px;border-radius:3px;background:#D8D8D8;margin:10px auto 0;flex-shrink:0}
 .sheet .sh{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px}
 .sheet .sh h3{margin:0;font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.5px}
+.shbtns{display:flex;gap:8px}
+#shEdit{background:var(--ink)}
+#shEdit svg{stroke:#fff}
+.view{display:flex;flex-direction:column;gap:14px;padding-bottom:8px}
+.view .vcat{align-self:flex-start;display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--grey2);font-size:13px;font-weight:600}
+.view .vcat i{width:10px;height:10px;border-radius:5px}
+.view .vt{margin:0;font-family:var(--display);font-weight:800;font-size:32px;line-height:1.08;letter-spacing:-.6px;word-break:break-word}
+.view .vb{font-size:18px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.view .vb a{color:var(--red-dark);word-break:break-all}
+.view .vempty{font-size:16px;color:var(--muted)}
+.view .vmeta{font-size:13px;color:var(--muted);padding-top:10px;border-top:1px solid var(--line)}
 .sheet .sb{overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:16px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field>label,.flabel{font-size:13px;font-weight:600;color:var(--muted)}
@@ -291,7 +302,10 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true">
   <div class="grab"></div>
   <div class="sh"><h3 id="shTitle"></h3>
+    <div class="shbtns">
+    <button class="roundbtn hidden" id="shEdit" aria-label="Editar idea"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>
     <button class="roundbtn" id="shClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
   </div>
   <div class="sb" id="shBody"></div>
 </div>
@@ -563,19 +577,20 @@ $('#ovin').addEventListener('click', e => {
   const day = e.target.closest('[data-day]');
   if (day) { calSel = day.dataset.day; renderSection(); return; }
   const op = e.target.closest('[data-open]');
-  if (op) openEditor(op.dataset.open);
+  if (op) openNote(op.dataset.open);
 });
 
 /* ---------- Editor de notas ---------- */
 let sheetMode = null;
-function openSheet(title, html, mode) {
+function openSheet(title, html, mode, swap) {
   sheetMode = mode;
+  $('#shEdit').classList.toggle('hidden', mode !== 'view');
   $('#shTitle').textContent = title;
   $('#shBody').innerHTML = html;
   $('#scrim').classList.add('show');
   $('#sheet').classList.add('show');
   $('#shBody').scrollTop = 0;
-  pushLayer('sheet');
+  if (!swap) pushLayer('sheet');
 }
 function closeSheet() {
   if (!sheetMode) return;
@@ -587,12 +602,32 @@ function closeSheet() {
 $('#scrim').onclick = () => history.back();
 $('#shClose').onclick = () => history.back();
 
+/* Ver una idea: primero se lee, el lápiz pasa a editarla */
+let viewId = null;
+const linkify = t => esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+function openNote(id) {
+  const n = S.notes.find(x => x.id === id);
+  if (n && n.list === 'ideas') openIdeaView(id); else openEditor(id);
+}
+function openIdeaView(id, swap) {
+  const n = S.notes.find(x => x.id === id); if (!n) return;
+  viewId = id;
+  const c = catOf(n.cat);
+  const when = new Date(n.upd || Date.now()).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  openSheet('', `<div class="view">
+    ${c ? `<span class="vcat"><i style="background:${esc(c.color)}"></i>${esc(c.name)}</span>` : ''}
+    ${n.title ? `<h2 class="vt">${esc(n.title)}</h2>` : ''}
+    ${n.body ? `<div class="vb">${linkify(n.body)}</div>` : (n.title ? '<div class="vempty">Sin más detalles. Toca el lápiz para añadirlos.</div>' : '')}
+    <div class="vmeta">Idea · editada el ${esc(when)}</div></div>`, 'view', swap);
+}
+$('#shEdit').onclick = () => { if (sheetMode === 'view' && viewId) openEditor(viewId, null, true); };
+
 let ed = null;
-function openEditor(id, preset) {
+function openEditor(id, preset, swap) {
   const n = id ? S.notes.find(x => x.id === id) : null;
   ed = n ? Object.assign({}, n) : Object.assign({ id: null, list: 'dia', date: today(), time: '', title: '', body: '', cat: '', imp: false, remind: false }, preset || {});
   if (!ed.date) ed.date = ed.list === 'dia' ? today() : '';
-  openSheet(n ? 'Editar nota' : 'Nueva nota', editorHTML(), 'editor');
+  openSheet(n ? (n.list === 'ideas' ? 'Editar idea' : 'Editar nota') : 'Nueva nota', editorHTML(), 'editor', swap);
   if (!n) setTimeout(() => $('#edTitle')?.focus(), 320);
 }
 function editorHTML() {
@@ -742,7 +777,7 @@ function renderSearch() {
     `<div class="empty">${q ? 'No hay notas con eso.' : 'Aún no tienes notas.'}</div>`;
 }
 $('#sq').addEventListener('input', renderSearch);
-$('#sres').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openEditor(b.dataset.open); });
+$('#sres').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openNote(b.dataset.open); });
 $('#searchBack').onclick = () => history.back();
 
 /* ---------- Botón atrás de Android ---------- */
