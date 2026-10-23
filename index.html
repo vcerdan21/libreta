@@ -36,7 +36,14 @@ a{color:var(--red-dark)}
 
 /* ---------- Inicio ---------- */
 #app{max-width:520px;margin:0 auto;height:100dvh;min-height:560px;position:relative;overflow:hidden}
-#home{height:100%;padding:calc(28px + var(--safe-t)) 20px calc(20px + var(--safe-b));display:flex;flex-direction:column;gap:18px;transition:transform .42s var(--ease),opacity .42s ease;transform-origin:50% 40%}
+/* Dos pantallas que se deslizan como el inicio del móvil */
+#pager{height:100%;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+#pager::-webkit-scrollbar{display:none}
+.page{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always}
+#dots{position:absolute;left:50%;bottom:calc(8px + var(--safe-b));transform:translateX(-50%);display:flex;gap:6px;z-index:5}
+#dots button{width:7px;height:7px;border-radius:4px;background:#CFCFCF;padding:0;transition:width .25s var(--ease),background .2s}
+#dots button.on{width:20px;background:var(--ink)}
+#home{height:100%;padding:calc(28px + var(--safe-t)) 20px calc(28px + var(--safe-b));display:flex;flex-direction:column;gap:18px;transition:transform .42s var(--ease),opacity .42s ease;transform-origin:50% 40%}
 #home.back{transform:scale(.94);opacity:.4}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 .top .date{font-size:14px;font-weight:500;color:var(--muted)}
@@ -90,6 +97,27 @@ a{color:var(--red-dark)}
 .dot.on{background:var(--red)}
 .newbtn{height:56px;flex-shrink:0;border-radius:28px;background:var(--ink);color:#fff;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px}
 .newbtn span{width:28px;height:28px;border-radius:14px;background:var(--red);display:flex;align-items:center;justify-content:center}
+
+/* ---------- Pantalla de Ideas ---------- */
+#ideasPage{background:var(--grey);display:flex;flex-direction:column;gap:14px;padding:calc(28px + var(--safe-t)) 20px calc(30px + var(--safe-b))}
+.ip-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.ip-head .date{font-size:14px;font-weight:500;color:#5E5E5E}
+.ip-head h1{margin:4px 0 0;font-family:var(--display);font-weight:800;font-size:40px;line-height:1;letter-spacing:-1px}
+#ideasPage .roundbtn{background:#fff}
+#ipCats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;margin:0 -20px;padding:0 20px}
+#ipCats::-webkit-scrollbar{display:none}
+#ipCats .chip{background:#fff;flex-shrink:0;white-space:nowrap}
+#ipCats .chip.on{background:var(--ink);color:#fff}
+#ipList{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:6px;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.iread{flex-shrink:0;background:#fff;border-radius:22px;padding:18px 18px 16px 20px;display:flex;flex-direction:column;gap:8px;text-align:left;position:relative;overflow:hidden}
+.iread .cat{position:absolute;left:0;top:16px;bottom:16px;width:4px;border-radius:0 4px 4px 0}
+.iread .nt{font-family:var(--display);font-size:21px;font-weight:700;line-height:1.15;letter-spacing:-.3px;word-break:break-word}
+.iread .nb{font-size:16px;line-height:1.5;color:#3A3A3A;white-space:pre-wrap;word-break:break-word}
+.iread .nb a{color:var(--red-dark);word-break:break-all}
+.iread .im{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:600;color:var(--muted2)}
+.iread .im i{width:8px;height:8px;border-radius:4px}
+#ipQuick input{background:#fff}
+#ipQuick button{background:var(--ink)}
 
 /* ---------- Sección ampliada ---------- */
 #ov{position:fixed;z-index:20;overflow:hidden;transition:left .42s var(--ease),top .42s var(--ease),width .42s var(--ease),height .42s var(--ease),border-radius .42s ease}
@@ -252,7 +280,8 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
 </head>
 <body>
 <div id="app">
-  <main id="home">
+ <div id="pager">
+  <main id="home" class="page">
     <header class="top">
       <div>
         <div class="date" id="hdate"></div>
@@ -277,6 +306,23 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
       Nueva nota
     </button>
   </main>
+
+  <section id="ideasPage" class="page" aria-label="Ideas">
+    <header class="ip-head">
+      <div>
+        <div class="date" id="ipCount"></div>
+        <h1>Ideas</h1>
+      </div>
+      <button class="roundbtn" id="ipNew" aria-label="Nueva idea con detalles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0E0E0E" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </header>
+    <div id="ipCats"></div>
+    <div id="ipList"></div>
+    <form class="quick" id="ipQuick"><input name="iq" placeholder="Apunta una idea" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Añadir idea"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></form>
+  </section>
+ </div>
+  <nav id="dots" aria-label="Pantallas"><button class="on" data-page="0" aria-label="Inicio"></button><button data-page="1" aria-label="Ideas"></button></nav>
 
   <div id="ov" class="hidden"><div id="ovin"></div></div>
 </div>
@@ -408,6 +454,7 @@ function removeNote(id) {
 function render() {
   $('#hdate').textContent = cap(longDate(today()));
   renderGrid();
+  renderIdeasPage();
   if (openSec) renderSection();
   if ($('#search').classList.contains('show')) renderSearch();
 }
@@ -456,6 +503,62 @@ function renderGrid() {
   const o = S.order;
   $('#grid').innerHTML = cardHTML(o[0], 'big') + `<div class="row2">${cardHTML(o[1], 'a')}${cardHTML(o[2], 'b')}</div>` + cardHTML(o[3], 'wide');
 }
+
+/* ---------- Pantalla de Ideas (se llega deslizando) ---------- */
+let curPage = 0, ipCat = '', skipPop = false;
+const pager = $('#pager');
+function goPage(i, instant) {
+  pager.scrollTo({ left: i * pager.clientWidth, behavior: instant ? 'auto' : 'smooth' });
+}
+function onPageChange(i) {
+  if (i === curPage) return;
+  curPage = i;
+  $('#dots').querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i));
+  // Botón atrás de Android: desde Ideas vuelve al inicio en vez de cerrar la app
+  if (i === 1 && !layers.includes('ideas')) pushLayer('ideas');
+  if (i === 0 && layers[layers.length - 1] === 'ideas') { layers.pop(); skipPop = true; history.back(); }
+}
+let pageT;
+pager.addEventListener('scroll', () => {
+  clearTimeout(pageT);
+  pageT = setTimeout(() => onPageChange(Math.round(pager.scrollLeft / pager.clientWidth)), 60);
+}, { passive: true });
+addEventListener('resize', () => goPage(curPage, true));
+$('#dots').addEventListener('click', e => { const b = e.target.closest('[data-page]'); if (b) goPage(+b.dataset.page); });
+
+function renderIdeasPage() {
+  const all = listNotes('ideas');
+  if (ipCat && !all.some(n => n.cat === ipCat)) ipCat = '';
+  const ns = ipCat ? all.filter(n => n.cat === ipCat) : all;
+  $('#ipCount').textContent = `${all.length} ${all.length === 1 ? 'idea guardada' : 'ideas guardadas'}`;
+  const used = S.cats.filter(c => all.some(n => n.cat === c.id));
+  $('#ipCats').classList.toggle('hidden', !used.length);
+  $('#ipCats').innerHTML = `<button class="chip${!ipCat ? ' on' : ''}" data-ipc="">Todas</button>` +
+    used.map(c => `<button class="chip${ipCat === c.id ? ' on' : ''}" data-ipc="${c.id}"><span class="sw" style="background:${esc(c.color)}"></span>${esc(c.name)}</button>`).join('');
+  const list = $('#ipList'), scroll = list.scrollTop;
+  list.innerHTML = ns.map(n => {
+    const c = catOf(n.cat);
+    const when = new Date(n.upd || Date.now()).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    return `<div class="iread" data-drag="${n.id}" data-drop="note:${n.id}" data-open="${n.id}">${catBar(n)}
+      ${n.title ? `<div class="nt">${esc(n.title)}</div>` : ''}
+      ${n.body ? `<div class="nb">${linkify(n.body)}</div>` : ''}
+      <div class="im">${c ? `<i style="background:${esc(c.color)}"></i>${esc(c.name)} · ` : ''}${esc(when)}</div></div>`;
+  }).join('') || `<div class="empty">${all.length ? 'No hay ideas en esta categoría.' : 'Aún no hay ideas. Apunta la primera abajo.'}</div>`;
+  list.scrollTop = scroll;
+}
+$('#ipCats').addEventListener('click', e => { const b = e.target.closest('[data-ipc]'); if (!b) return; ipCat = b.dataset.ipc; renderIdeasPage(); $('#ipList').scrollTop = 0; });
+$('#ipList').addEventListener('click', e => {
+  if (suppressClick || e.target.closest('a')) return;
+  const op = e.target.closest('[data-open]'); if (op) openNote(op.dataset.open);
+});
+$('#ipQuick').addEventListener('submit', e => {
+  e.preventDefault();
+  const inp = e.target.iq, v = inp.value.trim(); if (!v) return;
+  addNote({ title: v, list: 'ideas', date: '', cat: ipCat });
+  inp.value = ''; inp.focus();
+  const l = $('#ipList'); l.scrollTop = l.scrollHeight;
+});
+$('#ipNew').onclick = () => openEditor(null, { list: 'ideas', date: '', cat: ipCat });
 
 /* ---------- Sección ampliada ---------- */
 let openSec = null, calSel = today(), calMonth = today().slice(0, 7);
@@ -710,7 +813,7 @@ function openSettings() {
   <div class="sect"><h4>Copia de seguridad</h4>
     <div class="two"><button class="btn ghostb" id="bkExport">Descargar copia</button><button class="btn ghostb" id="bkImport">Cargar copia</button></div>
     <input type="file" id="bkFile" accept="application/json,.json" class="hidden"></div>
-  <p class="status" style="text-align:center">Libreta · versión 1.0</p>`, 'settings');
+  <p class="status" style="text-align:center">Libreta · versión 1.1</p>`, 'settings');
 }
 $('#shBody').addEventListener('click', async e => {
   if (sheetMode !== 'settings') return;
@@ -784,8 +887,10 @@ $('#searchBack').onclick = () => history.back();
 const layers = [];
 function pushLayer(name) { layers.push(name); history.pushState({ layer: name }, ''); }
 addEventListener('popstate', () => {
+  if (skipPop) { skipPop = false; return; }
   const l = layers.pop();
-  if (l === 'sheet') closeSheet();
+  if (l === 'ideas') goPage(0);
+  else if (l === 'sheet') closeSheet();
   else if (l === 'sec') closeSection();
   else if (l === 'search') closeSearch();
 });
@@ -840,7 +945,7 @@ function moveDrag(e) {
     if (t) t.classList.add(t.dataset.drop?.startsWith('note:') ? 'dropline' : 'over');
   }
   // desplazar la lista si llegas al borde
-  const sb = $('#ovin .secbody');
+  const sb = openSec ? $('#ovin .secbody') : curPage === 1 ? $('#ipList') : null;
   if (sb && drag.kind === 'note') {
     const r = sb.getBoundingClientRect();
     if (e.clientY < r.top + 50) sb.scrollTop -= 12; else if (e.clientY > r.bottom - 50 && e.clientY < r.bottom + 10) sb.scrollTop += 12;
@@ -887,7 +992,10 @@ function showTray() {
 function hideTray() { $('#tray').classList.remove('show'); }
 
 /* ---------- Inicio: toques ---------- */
-$('#grid').addEventListener('click', e => { const c = e.target.closest('[data-card]'); if (c) openSection(c.dataset.card, c); });
+$('#grid').addEventListener('click', e => {
+  const c = e.target.closest('[data-card]'); if (!c) return;
+  if (c.dataset.card === 'ideas') goPage(1); else openSection(c.dataset.card, c);
+});
 $('#btnNew').onclick = () => openEditor(null, { list: 'dia', date: today() });
 $('#btnSearch').onclick = openSearch;
 $('#btnSettings').onclick = openSettings;
