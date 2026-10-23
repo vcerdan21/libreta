@@ -1,10 +1,10 @@
 // Libreta — service worker: permite instalar la app y abrirla sin conexión.
 // Si cambias index.html, sube el número de CACHE (libreta-v1 → libreta-v2).
-const CACHE = 'libreta-v5';
+const CACHE = 'libreta-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => Promise.all(ASSETS.map(a => c.add(a).catch(() => {})))));
+  e.waitUntil(caches.open(CACHE).then(c => Promise.all(ASSETS.map(a => c.add(new Request(a, { cache: 'reload' })).catch(() => {})))));
   self.skipWaiting();
 });
 
@@ -26,6 +26,11 @@ self.addEventListener('fetch', e => {
     // La página siempre intenta la versión nueva; sin conexión usa la guardada
     e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return r; })
       .catch(() => caches.match('./index.html').then(r => r || caches.match('./'))));
+    return;
+  }
+  // El manifest siempre se pide a internet, para que Chrome vea la versión nueva
+  if (url.pathname.endsWith('manifest.json')) {
+    e.respondWith(fetch(req, { cache: 'no-store' }).catch(() => caches.match(req)));
     return;
   }
   e.respondWith(caches.match(req).then(hit => hit || fetch(req)));
