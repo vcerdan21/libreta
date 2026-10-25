@@ -1,6 +1,6 @@
 // Libreta — service worker: permite instalar la app y abrirla sin conexión.
 // Si cambias index.html, sube el número de CACHE (libreta-v1 → libreta-v2).
-const CACHE = 'libreta-app-v1';
+const CACHE = 'libreta-app-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

@@ -280,6 +280,46 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
 #toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-size:14px;font-weight:500;z-index:90;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s var(--ease);max-width:calc(100% - 40px);text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #toast button{color:#FF6B61;font-weight:700;margin-left:10px}
+
+/* ---------- Editor con formato ---------- */
+.sheet.full{height:calc(var(--vvh,100dvh) - 12px);max-height:none;bottom:var(--kb,0px);transition:transform .32s var(--ease),bottom .12s ease}
+.sheet.full .sh{padding:8px 16px 4px 20px}
+.sheet.full .sh h3{font-family:var(--text);font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0}
+.sheet.full .sb{flex:1;min-height:0;gap:12px;padding-bottom:18px}
+#shSave{height:44px;border-radius:22px;background:var(--ink);color:#fff;padding:0 18px;font-weight:600;font-size:15px}
+.ed-title{border:0;outline:none;background:none;width:100%;padding:0;font-family:var(--display);font-weight:800;font-size:28px;line-height:1.15;letter-spacing:-.5px}
+.ed-title::placeholder{color:#C4C4C4}
+.ed-meta{display:flex;gap:8px;flex-wrap:wrap}
+.mpill{display:flex;align-items:center;gap:7px;padding:8px 12px 8px 13px;border-radius:999px;background:var(--grey2);font-size:14px;font-weight:600;max-width:100%}
+.mpill i{width:10px;height:10px;border-radius:5px;flex-shrink:0}
+.mpill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpill svg{flex-shrink:0;transition:transform .2s var(--ease)}
+.ed-meta.open .mpill{background:var(--ink);color:#fff}
+.ed-meta.open .mpill svg{transform:rotate(180deg)}
+.ed-panel{border:1px solid var(--line);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:14px}
+.ed-panel .btn.danger{height:44px;font-size:15px}
+.rte{flex:1 0 auto;min-height:38vh;outline:none;font-size:17px;line-height:1.55;word-break:break-word;white-space:pre-wrap;padding:2px 0 40px;caret-color:var(--red)}
+.rte.isempty::before{content:attr(data-ph);color:#B5B5B5;pointer-events:none;float:left}
+.rich ul,.rich ol{margin:2px 0;padding-left:26px}
+.rich ul.todo{list-style:none;padding-left:0}
+.rich ul.todo>li{position:relative;padding-left:34px;margin:3px 0}
+.rich ul.todo>li::before{content:"";position:absolute;left:2px;top:.15em;width:21px;height:21px;box-sizing:border-box;border:2px solid currentColor;border-radius:7px;opacity:.8}
+.rich ul.todo>li[data-done]{text-decoration:line-through;color:var(--muted2)}
+.rich ul.todo>li[data-done]::before{opacity:1;border-color:var(--red);background:var(--red) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/15px no-repeat}
+.vb.rich ul.todo>li::before{cursor:pointer}
+.edbar{display:none;align-items:center;gap:2px;padding:6px 8px;border-top:1px solid var(--line);background:#fff;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.sheet.full .edbar{display:flex}
+.edbar::-webkit-scrollbar{display:none}
+.edbar button{min-width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--ink)}
+.edbar button.on{background:var(--ink);color:#fff}
+.edbar button.pop{background:var(--grey2)}
+.edbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;flex-shrink:0}
+.edbar .cbar{display:block;width:18px;height:4px;border-radius:2px;margin-top:2px}
+.edpop{position:absolute;left:12px;right:12px;bottom:calc(64px + var(--safe-b));background:#fff;border-radius:20px;box-shadow:0 10px 36px rgba(0,0,0,.22);padding:14px;display:flex;flex-direction:column;gap:10px;z-index:3}
+.edpop h5{margin:0;font-size:12px;font-weight:600;color:var(--muted)}
+.edpop .row{display:flex;gap:8px;flex-wrap:wrap}
+.edpop .szb{flex:1;min-width:64px;height:52px;border-radius:14px;background:var(--grey2);display:flex;align-items:center;justify-content:center;font-weight:600}
+.edpop .swb{width:36px;height:36px;border-radius:18px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -354,10 +394,13 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
   <div class="sh"><h3 id="shTitle"></h3>
     <div class="shbtns">
     <button class="roundbtn hidden" id="shEdit" aria-label="Editar idea"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>
+    <button class="hidden" id="shSave" type="button">Guardar</button>
     <button class="roundbtn" id="shClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
   </div>
   <div class="sb" id="shBody"></div>
+  <div class="edpop hidden" id="edPop"></div>
+  <div class="edbar" id="edBar" aria-label="Formato del texto"></div>
 </div>
 <div id="toast"></div>
 
@@ -553,7 +596,7 @@ function renderIdeasPage() {
     const when = new Date(n.upd || Date.now()).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
     return `<div class="iread" data-drag="${n.id}" data-drop="note:${n.id}" data-open="${n.id}">${catBar(n)}
       ${n.title ? `<div class="nt">${esc(n.title)}</div>` : ''}
-      ${n.body ? `<div class="nb">${linkify(n.body)}</div>` : ''}
+      ${n.body ? `<div class="nb rich">${richHTML(n)}</div>` : ''}
       <div class="im">${c ? `<i style="background:${esc(c.color)}"></i>${esc(c.name)} · ` : ''}${esc(when)}</div></div>`;
   }).join('') || `<div class="empty">${all.length ? 'No hay ideas en estas categorías.' : 'Aún no hay ideas. Apunta la primera abajo.'}</div>`;
   list.scrollTop = scroll;
@@ -624,7 +667,7 @@ function noteCard(n) {
   return `<div class="note" data-drag="${n.id}" data-drop="note:${n.id}" data-open="${n.id}">${catBar(n)}
     ${n.time ? `<div class="ntime">${esc(n.time)}${n.remind ? bell : ''}</div>` : ''}
     ${n.title ? `<div class="nt">${esc(n.title)}</div>` : ''}
-    ${n.body ? `<div class="nb">${esc(n.body)}</div>` : ''}</div>`;
+    ${n.body ? `<div class="nb rich">${richHTML(n)}</div>` : ''}</div>`;
 }
 function renderSection() {
   const t = openSec, box = $('#ovin');
@@ -649,7 +692,7 @@ function renderSection() {
     const ns = listNotes('ideas');
     html = secHead('ideas', `${ns.length} ${ns.length === 1 ? 'idea' : 'ideas'} · todo lo que no quieres olvidar`) +
       `<div class="secbody"><div class="ideasgrid">${ns.map(n => `<div class="idea" data-drag="${n.id}" data-drop="note:${n.id}" data-open="${n.id}">${catBar(n)}
-        ${n.title ? `<div class="nt">${esc(n.title)}</div>` : ''}${n.body ? `<div class="nb">${esc(n.body)}</div>` : ''}</div>`).join('')}</div>
+        ${n.title ? `<div class="nt">${esc(n.title)}</div>` : ''}${n.body ? `<div class="nb rich">${richHTML(n)}</div>` : ''}</div>`).join('')}</div>
         ${ns.length ? '' : '<div class="empty">Sin ideas todavía.</div>'}</div>` + quick('Apunta una idea');
   } else if (t === 'cal') {
     const [y, m] = calMonth.split('-').map(Number);
@@ -707,22 +750,120 @@ let sheetMode = null;
 function openSheet(title, html, mode, swap) {
   sheetMode = mode;
   $('#shEdit').classList.toggle('hidden', mode !== 'view');
+  $('#shSave').classList.toggle('hidden', mode !== 'editor');
+  $('#sheet').classList.toggle('full', mode === 'editor');
+  $('#edPop').classList.add('hidden');
   $('#shTitle').textContent = title;
   $('#shBody').innerHTML = html;
   $('#scrim').classList.add('show');
   $('#sheet').classList.add('show');
   $('#shBody').scrollTop = 0;
+  fitSheet();
   if (!swap) pushLayer('sheet');
 }
 function closeSheet() {
   if (!sheetMode) return;
+  if (sheetMode === 'editor') autoSaveEditor();
   sheetMode = null;
   $('#scrim').classList.remove('show');
   $('#sheet').classList.remove('show');
+  $('#edPop').classList.add('hidden');
   document.activeElement?.blur?.();
+  setTimeout(() => { if (!sheetMode) { $('#sheet').classList.remove('full'); fitSheet(); } }, 330);
 }
 $('#scrim').onclick = () => history.back();
 $('#shClose').onclick = () => history.back();
+
+// Con el teclado abierto, el editor se encoge para que la barra de formato quede encima del teclado
+function fitSheet() {
+  const sh = $('#sheet'), vv = window.visualViewport;
+  if (!vv || sheetMode !== 'editor') { sh.style.removeProperty('--kb'); sh.style.removeProperty('--vvh'); return; }
+  sh.style.setProperty('--kb', Math.max(0, innerHeight - vv.height - vv.offsetTop) + 'px');
+  sh.style.setProperty('--vvh', vv.height + 'px');
+}
+if (window.visualViewport) { visualViewport.addEventListener('resize', fitSheet); visualViewport.addEventListener('scroll', fitSheet); }
+
+/* ---------- Texto con formato ----------
+   Las notas guardan el texto con formato en "html" y una copia en texto
+   plano en "body" (para buscar, las tarjetas del inicio y las notas antiguas). */
+const tpl = html => { const t = document.createElement('template'); t.innerHTML = html || ''; return t; };
+const KEEP_TAGS = /^(B|STRONG|I|EM|U|S|STRIKE|DEL|BR|DIV|P|UL|OL|LI|SPAN|FONT|A)$/;
+const SAFE_VAL = /^[#\w\s(),.%-]+$/;
+const FONT_EM = { 1: '.7em', 2: '.85em', 4: '1.15em', 5: '1.4em', 6: '1.8em', 7: '2.2em' };
+function cleanHTML(html) {
+  const t = tpl(html);
+  (function walk(node) {
+    [...node.childNodes].forEach(ch => {
+      if (ch.nodeType === 3) return;
+      if (ch.nodeType !== 1) { ch.remove(); return; }
+      const tag = ch.tagName;
+      if (!KEEP_TAGS.test(tag)) {
+        if (/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|TEMPLATE|SVG|MATH|IMG|VIDEO|AUDIO|LINK|META)$/.test(tag)) { ch.remove(); return; }
+        walk(ch); ch.replaceWith(...ch.childNodes); return;
+      }
+      walk(ch);
+      // Estilos permitidos: color, resaltado, tamaño y tachado/subrayado
+      const st = [];
+      const cs = ch.style;
+      if (cs) {
+        if (cs.color && SAFE_VAL.test(cs.color)) st.push('color:' + cs.color);
+        if (cs.backgroundColor && SAFE_VAL.test(cs.backgroundColor) && !/transparent|rgba\(0, 0, 0, 0\)/.test(cs.backgroundColor)) st.push('background-color:' + cs.backgroundColor);
+        if (cs.fontSize && SAFE_VAL.test(cs.fontSize)) st.push('font-size:' + cs.fontSize);
+        if (cs.fontWeight && /^(bold|[6-9]00)$/.test(cs.fontWeight)) st.push('font-weight:bold');
+        if (cs.fontStyle === 'italic') st.push('font-style:italic');
+        const td = cs.textDecorationLine || cs.textDecoration || '';
+        if (/underline|line-through/.test(td)) st.push('text-decoration:' + td.match(/underline|line-through/g).join(' '));
+      }
+      if (tag === 'FONT') {
+        const sz = ch.getAttribute('size'), co = ch.getAttribute('color');
+        if (FONT_EM[sz]) st.push('font-size:' + FONT_EM[sz]);
+        if (co && SAFE_VAL.test(co)) st.push('color:' + co);
+      }
+      const isTodo = tag === 'UL' && ch.classList.contains('todo');
+      const done = tag === 'LI' && ch.hasAttribute('data-done');
+      const href = tag === 'A' ? ch.getAttribute('href') : '';
+      [...ch.attributes].forEach(a => ch.removeAttribute(a.name));
+      let el = ch;
+      if (tag === 'FONT') { el = document.createElement('span'); el.append(...ch.childNodes); ch.replaceWith(el); }
+      if (st.length) el.setAttribute('style', st.join(';'));
+      if (isTodo) el.className = 'todo';
+      if (done) el.setAttribute('data-done', '');
+      if (tag === 'A' && /^https?:\/\//i.test(href || '')) { el.setAttribute('href', href); el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener'); }
+      if (tag === 'SPAN' && !el.attributes.length) el.replaceWith(...el.childNodes);
+    });
+  })(t.content);
+  return t.innerHTML;
+}
+function htmlToText(html) {
+  const t = tpl(html); let out = '';
+  (function walk(node) {
+    node.childNodes.forEach(ch => {
+      if (ch.nodeType === 3) { out += ch.nodeValue; return; }
+      if (ch.nodeType !== 1) return;
+      const tag = ch.tagName;
+      if (tag === 'BR') { out += '\n'; return; }
+      const block = /^(DIV|P|LI|UL|OL)$/.test(tag);
+      if (block && out && !out.endsWith('\n')) out += '\n';
+      if (tag === 'LI') {
+        const p = ch.parentElement;
+        out += p && p.classList.contains('todo') ? (ch.hasAttribute('data-done') ? '☑ ' : '☐ ') : p && p.tagName === 'OL' ? ([...p.children].indexOf(ch) + 1) + '. ' : '• ';
+      }
+      walk(ch);
+      if (block && !out.endsWith('\n')) out += '\n';
+    });
+  })(t.content);
+  return out.replace(/ /g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+const textToHtml = txt => String(txt || '').split('\n').map(l => `<div>${l ? esc(l) : '<br>'}</div>`).join('');
+// Lo que se enseña en tarjetas y en la vista de lectura (con enlaces que se pueden tocar)
+function richHTML(n) {
+  if (!n.html) return linkify(n.body);
+  const t = tpl(cleanHTML(n.html));
+  const w = document.createTreeWalker(t.content, NodeFilter.SHOW_TEXT), found = [];
+  while (w.nextNode()) { const x = w.currentNode; if (/https?:\/\//.test(x.nodeValue) && !(x.parentElement && x.parentElement.closest('a'))) found.push(x); }
+  found.forEach(x => { const s = document.createElement('span'); s.innerHTML = linkify(x.nodeValue); x.replaceWith(...s.childNodes); });
+  return t.innerHTML;
+}
 
 /* Ver una idea: primero se lee, el lápiz pasa a editarla */
 let viewId = null;
@@ -739,62 +880,108 @@ function openIdeaView(id, swap) {
   openSheet('', `<div class="view">
     ${c ? `<span class="vcat"><i style="background:${esc(c.color)}"></i>${esc(c.name)}</span>` : ''}
     ${n.title ? `<h2 class="vt">${esc(n.title)}</h2>` : ''}
-    ${n.body ? `<div class="vb">${linkify(n.body)}</div>` : (n.title ? '<div class="vempty">Sin más detalles. Toca el lápiz para añadirlos.</div>' : '')}
+    ${n.body ? `<div class="vb rich">${richHTML(n)}</div>` : (n.title ? '<div class="vempty">Sin más detalles. Toca el lápiz para añadirlos.</div>' : '')}
     <div class="vmeta">Idea · editada el ${esc(when)}</div></div>`, 'view', swap);
 }
 $('#shEdit').onclick = () => { if (sheetMode === 'view' && viewId) openEditor(viewId, null, true); };
+// En la vista de lectura también se pueden tachar las tareas de una lista
+$('#shBody').addEventListener('click', e => {
+  if (sheetMode !== 'view') return;
+  const li = e.target.closest('.vb ul.todo>li'); if (!li || e.target.closest('a')) return;
+  if (e.clientX - li.getBoundingClientRect().left > 36) return;
+  const n = S.notes.find(x => x.id === viewId); if (!n) return;
+  const idx = [...$('#shBody').querySelectorAll('.vb ul.todo>li')].indexOf(li);
+  const t = tpl(cleanHTML(n.html || ''));
+  const target = t.content.querySelectorAll('ul.todo>li')[idx]; if (!target) return;
+  target.toggleAttribute('data-done'); li.toggleAttribute('data-done');
+  patch(n.id, { html: t.innerHTML, body: htmlToText(t.innerHTML) });
+});
 
-let ed = null;
+let ed = null, edSnap = '';
+const chev = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 function openEditor(id, preset, swap) {
   const n = id ? S.notes.find(x => x.id === id) : null;
   ed = n ? Object.assign({}, n) : Object.assign({ id: null, list: 'dia', date: today(), time: '', title: '', body: '', cat: '', imp: false, remind: false }, preset || {});
   if (!ed.date) ed.date = ed.list === 'dia' ? today() : '';
+  ed.skip = false;
   openSheet(n ? (n.list === 'ideas' ? 'Editar idea' : 'Editar nota') : 'Nueva nota', editorHTML(), 'editor', swap);
+  const r = $('#edBody');
+  r.innerHTML = ed.html ? cleanHTML(ed.html) : textToHtml(ed.body);
+  if (!r.textContent && !r.querySelector('li')) r.innerHTML = '';
+  edEmpty(); updPills(); renderBar();
+  edSnap = edState();
   if (!n) setTimeout(() => $('#edTitle')?.focus(), 320);
 }
 function editorHTML() {
   const e = ed;
-  return `<div class="field"><input class="inp ti" id="edTitle" placeholder="Título" value="${esc(e.title)}" autocomplete="off"></div>
-  <div class="field"><textarea class="inp" id="edBody" placeholder="Escribe aquí los detalles…">${esc(e.body)}</textarea></div>
-  <div class="field"><span class="flabel">Dónde va</span><div class="seg" id="edList">
-    <button data-l="dia" class="${e.list === 'dia' ? 'on' : ''}">Un día</button><button data-l="pend" class="${e.list === 'pend' ? 'on' : ''}">Pendientes</button><button data-l="ideas" class="${e.list === 'ideas' ? 'on' : ''}">Ideas</button></div></div>
-  <div id="edDay" class="${e.list === 'dia' ? '' : 'hidden'}" style="display:flex;flex-direction:column;gap:12px">
-    <div class="two"><div class="field"><label for="edDate">Día</label><input class="inp" type="date" id="edDate" value="${esc(e.date || today())}"></div>
-    <div class="field"><label for="edTime">Hora (opcional)</label><input class="inp" type="time" id="edTime" value="${esc(e.time)}"></div></div>
-    <button class="toggle${e.remind ? ' on' : ''}" id="edRemind" type="button"><span>Avisarme a esa hora<small>Te llega una notificación al móvil</small></span><span class="sw-t"></span></button>
+  return `<input class="ed-title" id="edTitle" placeholder="Título" value="${esc(e.title)}" autocomplete="off" enterkeyhint="next">
+  <div class="ed-meta" id="edMeta">
+    <button class="mpill" id="edWhereP" type="button"><span></span>${chev}</button>
+    <button class="mpill" id="edCatP" type="button"><i></i><span></span>${chev}</button>
   </div>
-  <button class="toggle${e.imp ? ' on' : ''} ${e.list === 'pend' ? '' : 'hidden'}" id="edImp" type="button"><span>Importante<small>Sale destacada en el inicio</small></span><span class="sw-t"></span></button>
-  <div class="field"><span class="flabel">Categoría</span><div class="chips" id="edCats">
-    <button class="chip${!e.cat ? ' on' : ''}" data-c="">Sin categoría</button>
-    ${S.cats.map(c => `<button class="chip${e.cat === c.id ? ' on' : ''}" data-c="${c.id}"><span class="sw" style="background:${esc(c.color)}"></span>${esc(c.name)}</button>`).join('')}
-  </div></div>
-  <div class="actions">${e.id ? '<button class="btn danger" id="edDel" type="button">Eliminar</button>' : ''}<button class="btn primary" id="edSave" type="button">Guardar</button></div>`;
+  <div class="ed-panel hidden" id="edPanel">
+    <div class="field"><span class="flabel">Dónde va</span><div class="seg" id="edList">
+      <button data-l="dia" class="${e.list === 'dia' ? 'on' : ''}">Un día</button><button data-l="pend" class="${e.list === 'pend' ? 'on' : ''}">Pendiente</button><button data-l="ideas" class="${e.list === 'ideas' ? 'on' : ''}">Idea</button></div></div>
+    <div id="edDay" class="${e.list === 'dia' ? '' : 'hidden'}" style="display:flex;flex-direction:column;gap:12px">
+      <div class="two"><div class="field"><label for="edDate">Día</label><input class="inp" type="date" id="edDate" value="${esc(e.date || today())}"></div>
+      <div class="field"><label for="edTime">Hora (opcional)</label><input class="inp" type="time" id="edTime" value="${esc(e.time)}"></div></div>
+      <button class="toggle${e.remind ? ' on' : ''}" id="edRemind" type="button"><span>Avisarme a esa hora<small>Te llega una notificación al móvil</small></span><span class="sw-t"></span></button>
+    </div>
+    <button class="toggle${e.imp ? ' on' : ''} ${e.list === 'pend' ? '' : 'hidden'}" id="edImp" type="button"><span>Importante<small>Sale destacada en el inicio</small></span><span class="sw-t"></span></button>
+    <div class="field"><span class="flabel">Categoría</span><div class="chips" id="edCats">
+      <button class="chip${!e.cat ? ' on' : ''}" data-c="">Sin categoría</button>
+      ${S.cats.map(c => `<button class="chip${e.cat === c.id ? ' on' : ''}" data-c="${c.id}"><span class="sw" style="background:${esc(c.color)}"></span>${esc(c.name)}</button>`).join('')}
+    </div></div>
+    ${e.id ? '<button class="btn danger" id="edDel" type="button">Eliminar nota</button>' : ''}
+  </div>
+  <div class="rte rich" id="edBody" contenteditable="true" data-ph="Escribe aquí…" spellcheck="true"></div>`;
 }
+function updPills() {
+  const w = $('#edWhereP span'), cp = $('#edCatP'); if (!w) return;
+  let label = ed.list === 'pend' ? 'Pendiente' : ed.list === 'ideas' ? 'Idea' : niceDay($('#edDate')?.value || ed.date || today());
+  if (ed.list === 'dia' && $('#edTime')?.value) label += ' · ' + $('#edTime').value;
+  w.textContent = label;
+  const c = catOf(ed.cat);
+  cp.querySelector('span').textContent = c ? c.name : 'Sin categoría';
+  cp.querySelector('i').style.background = c ? c.color : '#CFCFCF';
+}
+const edState = () => JSON.stringify([$('#edTitle')?.value || '', $('#edBody')?.innerHTML || '', ed.list, ed.cat, $('#edDate')?.value, $('#edTime')?.value, ed.remind, ed.imp]);
 $('#shBody').addEventListener('click', e => {
   if (sheetMode !== 'editor') return;
+  if (e.target.closest('#edWhereP,#edCatP')) {
+    const open = $('#edPanel').classList.toggle('hidden') === false;
+    $('#edMeta').classList.toggle('open', open);
+    return;
+  }
   const l = e.target.closest('#edList [data-l]');
   if (l) {
     ed.list = l.dataset.l;
     $('#edList').querySelectorAll('button').forEach(b => b.classList.toggle('on', b === l));
     $('#edDay').classList.toggle('hidden', ed.list !== 'dia');
     $('#edImp').classList.toggle('hidden', ed.list !== 'pend');
-    return;
+    updPills(); return;
   }
   const c = e.target.closest('#edCats [data-c]');
-  if (c) { ed.cat = c.dataset.c; $('#edCats').querySelectorAll('.chip').forEach(b => b.classList.toggle('on', b === c)); return; }
+  if (c) { ed.cat = c.dataset.c; $('#edCats').querySelectorAll('.chip').forEach(b => b.classList.toggle('on', b === c)); updPills(); return; }
   if (e.target.closest('#edRemind')) {
     ed.remind = !ed.remind; $('#edRemind').classList.toggle('on', ed.remind);
     if (ed.remind) askNotify();
     return;
   }
   if (e.target.closest('#edImp')) { ed.imp = !ed.imp; $('#edImp').classList.toggle('on', ed.imp); return; }
-  if (e.target.closest('#edDel')) { const id = ed.id; history.back(); removeNote(id); return; }
-  if (e.target.closest('#edSave')) saveEditor();
+  if (e.target.closest('#edDel')) { const id = ed.id; ed.skip = true; history.back(); removeNote(id); return; }
 });
-function saveEditor() {
-  const title = $('#edTitle').value.trim(), body = $('#edBody').value.trim();
-  if (!title && !body) { toast('Escribe algo antes de guardar'); return; }
-  const p = { title, body, list: ed.list, cat: ed.cat, imp: ed.list === 'pend' && ed.imp };
+$('#shBody').addEventListener('change', e => { if (sheetMode === 'editor' && /^ed(Date|Time)$/.test(e.target.id)) updPills(); });
+$('#shSave').onclick = () => { if (saveEditor()) { ed.skip = true; history.back(); } };
+$('#shBody').addEventListener('keydown', e => { if (e.target.id === 'edTitle' && e.key === 'Enter') { e.preventDefault(); const r = $('#edBody'); r.focus(); caretEnd(r); } });
+
+// Guarda lo que haya en el editor. Devuelve false si no hay nada escrito.
+function saveEditor(silent) {
+  const title = $('#edTitle').value.trim();
+  const html = cleanHTML($('#edBody').innerHTML);
+  const body = htmlToText(html);
+  if (!title && !body) { if (!silent) toast('Escribe algo antes de guardar'); return false; }
+  const p = { title, body, html: body ? html : '', list: ed.list, cat: ed.cat, imp: ed.list === 'pend' && ed.imp };
   if (ed.list === 'dia') {
     p.date = $('#edDate').value || today();
     p.time = $('#edTime').value || '';
@@ -803,9 +990,135 @@ function saveEditor() {
   } else { p.date = ''; p.time = ''; p.remind = false; }
   const old = ed.id ? S.notes.find(x => x.id === ed.id) : null;
   if (old && (old.date !== p.date || old.time !== p.time)) p.notified = false;
-  if (old) patch(old.id, p); else addNote(p);
-  history.back();
+  if (old) patch(old.id, p); else { const n = addNote(p); ed.id = n.id; }
+  return true;
 }
+// Como en las apps de notas del móvil: al salir con la flecha atrás o la X se guarda solo
+function autoSaveEditor() {
+  if (!ed || ed.skip || !$('#edBody')) return;
+  if (edState() === edSnap) return;
+  if (saveEditor(true)) toast('Guardado');
+}
+
+/* ---------- Barra de formato ---------- */
+const ico = d => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const TEXT_COLORS = ['#0E0E0E', '#E10600', '#F97316', '#CA8A04', '#16A34A', '#2F7DF6', '#7C3AED', '#8A8A8A'];
+const HILITES = ['', '#FFF176', '#B9F6CA', '#B3E5FC', '#F8BBD0', '#FFD8A8'];
+let edColor = '#0E0E0E';
+function renderBar() {
+  $('#edBar').innerHTML = `
+    <button data-cmd="todo" aria-label="Lista de tareas">${ico('<rect x="3" y="4" width="7" height="7" rx="2"/><path d="M4.8 7.5l1.3 1.3 2.2-2.4"/><path d="M14 7.5h7"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M14 17.5h7"/>')}</button>
+    <span class="sep"></span>
+    <button data-cmd="bold" aria-label="Negrita"><b>B</b></button>
+    <button data-cmd="italic" aria-label="Cursiva"><i style="font-family:Georgia,serif">I</i></button>
+    <button data-cmd="underline" aria-label="Subrayado"><u>U</u></button>
+    <button data-cmd="strikeThrough" aria-label="Tachado"><s>S</s></button>
+    <span class="sep"></span>
+    <button data-cmd="size" aria-label="Tamaño de letra" style="font-weight:700">A<span style="font-size:13px">a</span></button>
+    <button data-cmd="color" aria-label="Color" style="flex-direction:column;font-weight:700;font-size:17px;line-height:1">A<span class="cbar" style="background:${edColor}"></span></button>
+    <span class="sep"></span>
+    <button data-cmd="ul" aria-label="Viñetas">${ico('<circle cx="5" cy="7" r="1.3" fill="currentColor"/><circle cx="5" cy="17" r="1.3" fill="currentColor"/><path d="M10 7h11M10 17h11"/>')}</button>
+    <button data-cmd="ol" aria-label="Lista numerada">${ico('<path d="M10 7h11M10 17h11"/><path d="M4 5h1.5v5M3.5 14.5c.4-.6 2.6-.9 2.6.6 0 1-2.6 2.2-2.6 3.4h2.8" stroke-width="1.6"/>')}</button>
+    <span class="sep"></span>
+    <button data-cmd="undo" aria-label="Deshacer">${ico('<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/>')}</button>
+    <button data-cmd="redo" aria-label="Rehacer">${ico('<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/>')}</button>`;
+}
+let edRange = null;
+document.addEventListener('selectionchange', () => {
+  const r = $('#edBody'); if (sheetMode !== 'editor' || !r) return;
+  const s = getSelection();
+  if (s.rangeCount && r.contains(s.anchorNode)) { edRange = s.getRangeAt(0).cloneRange(); updBar(); }
+});
+function caretEnd(el) { const rg = document.createRange(); rg.selectNodeContents(el); rg.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); }
+function focusRte() {
+  const r = $('#edBody'); r.focus();
+  const s = getSelection();
+  if (edRange && r.contains(edRange.startContainer)) { s.removeAllRanges(); s.addRange(edRange); }
+  else if (!(s.rangeCount && r.contains(s.anchorNode))) caretEnd(r);
+}
+function selLi() {
+  const s = getSelection(); if (!s.rangeCount) return null;
+  let n = s.anchorNode; if (n && n.nodeType === 3) n = n.parentNode;
+  const li = n && n.closest ? n.closest('li') : null;
+  return li && $('#edBody').contains(li) ? li : null;
+}
+const inTodo = () => { const li = selLi(); return !!(li && li.parentElement.tagName === 'UL' && li.parentElement.classList.contains('todo')); };
+function updBar() {
+  const bar = $('#edBar');
+  const q = c => { try { return document.queryCommandState(c); } catch (e) { return false; } };
+  const li = selLi(), list = li && li.parentElement;
+  const st = { bold: q('bold'), italic: q('italic'), underline: q('underline'), strikeThrough: q('strikeThrough') && !(li && li.hasAttribute('data-done')),
+    todo: inTodo(), ul: !!(list && list.tagName === 'UL' && !list.classList.contains('todo')), ol: !!(list && list.tagName === 'OL') };
+  bar.querySelectorAll('[data-cmd]').forEach(b => b.classList.toggle('on', !!st[b.dataset.cmd]));
+}
+function edEmpty() { const r = $('#edBody'); if (r) r.classList.toggle('isempty', !r.textContent.trim() && !r.querySelector('li')); }
+function exec(c, v) { document.execCommand(c, false, v ?? null); }
+function runCmd(c) {
+  focusRte();
+  if (c === 'todo') {
+    const li = selLi(), list = li && li.parentElement;
+    if (inTodo()) exec('insertUnorderedList');
+    else if (list && list.tagName === 'UL') list.classList.add('todo');
+    else { if (list && list.tagName === 'OL') exec('insertOrderedList'); exec('insertUnorderedList'); const n = selLi(); if (n) n.parentElement.classList.add('todo'); }
+  } else if (c === 'ul') {
+    if (inTodo()) { const list = selLi().parentElement; list.classList.remove('todo'); list.querySelectorAll('li[data-done]').forEach(x => x.removeAttribute('data-done')); }
+    else exec('insertUnorderedList');
+  } else if (c === 'ol') exec('insertOrderedList');
+  else exec(c);
+  edEmpty(); updBar();
+}
+function showPop(kind) {
+  const pop = $('#edPop');
+  if (!pop.classList.contains('hidden') && pop.dataset.kind === kind) { pop.classList.add('hidden'); markPop(); return; }
+  pop.dataset.kind = kind;
+  if (kind === 'size') {
+    pop.innerHTML = `<h5>Tamaño de letra</h5><div class="row">
+      <button class="szb" data-size="2" style="font-size:13px">Pequeña</button><button class="szb" data-size="3" style="font-size:16px">Normal</button>
+      <button class="szb" data-size="5" style="font-size:21px">Grande</button><button class="szb" data-size="6" style="font-size:26px">Enorme</button></div>`;
+  } else {
+    pop.innerHTML = `<h5>Color del texto</h5><div class="row">${TEXT_COLORS.map(c => `<button class="swb" data-color="${c}" style="background:${c}" aria-label="Color ${c}"></button>`).join('')}</div>
+      <h5>Resaltar</h5><div class="row">${HILITES.map(c => `<button class="swb" data-hl="${c}" style="background:${c || '#fff'}" aria-label="${c ? 'Resaltado ' + c : 'Sin resaltado'}">${c ? '' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A6A6A6" stroke-width="2.2" stroke-linecap="round"><path d="M5 19L19 5"/></svg>'}</button>`).join('')}</div>`;
+  }
+  pop.classList.remove('hidden'); markPop();
+}
+function markPop() { const pop = $('#edPop'), open = !pop.classList.contains('hidden'); $('#edBar').querySelectorAll('[data-cmd=size],[data-cmd=color]').forEach(b => b.classList.toggle('pop', open && b.dataset.cmd === pop.dataset.kind)); }
+// Que tocar la barra no cierre el teclado ni pierda la selección
+['#edBar', '#edPop'].forEach(sel => $(sel).addEventListener('mousedown', e => e.preventDefault()));
+$('#edBar').addEventListener('click', e => {
+  const b = e.target.closest('[data-cmd]'); if (!b || sheetMode !== 'editor') return;
+  const c = b.dataset.cmd;
+  if (c === 'size' || c === 'color') { showPop(c); return; }
+  $('#edPop').classList.add('hidden'); markPop();
+  runCmd(c);
+});
+$('#edPop').addEventListener('click', e => {
+  const sz = e.target.closest('[data-size]'), co = e.target.closest('[data-color]'), hl = e.target.closest('[data-hl]');
+  if (!sz && !co && !hl) return;
+  focusRte();
+  if (sz) { exec('styleWithCSS', false); exec('fontSize', sz.dataset.size); }
+  if (co) { exec('styleWithCSS', false); exec('foreColor', co.dataset.color); edColor = co.dataset.color; const cb = $('#edBar .cbar'); if (cb) cb.style.background = edColor; }
+  if (hl) { exec('styleWithCSS', true); exec('hiliteColor', hl.dataset.hl || 'transparent'); exec('styleWithCSS', false); }
+  $('#edPop').classList.add('hidden'); markPop(); updBar();
+});
+// Dentro del texto: tachar tareas, pegar como texto limpio y detalles de las listas
+$('#shBody').addEventListener('click', e => {
+  if (sheetMode !== 'editor') return;
+  if (!e.target.closest('#edBody')) { if (!e.target.closest('#edPanel')) { $('#edPop').classList.add('hidden'); markPop(); } return; }
+  $('#edPop').classList.add('hidden'); markPop();
+  const li = e.target.closest('ul.todo>li');
+  if (li && e.clientX - li.getBoundingClientRect().left < 34) { li.toggleAttribute('data-done'); e.preventDefault(); }
+});
+$('#shBody').addEventListener('input', e => {
+  if (e.target.id !== 'edBody') return;
+  // La tarea nueva que sale al pulsar Intro empieza sin tachar
+  if (e.inputType === 'insertParagraph') { const li = selLi(); if (li && !li.textContent.trim()) li.removeAttribute('data-done'); }
+  edEmpty(); updBar();
+});
+$('#shBody').addEventListener('paste', e => {
+  if (e.target.closest && !e.target.closest('#edBody')) return;
+  const txt = e.clipboardData && e.clipboardData.getData('text/plain'); if (txt == null) return;
+  e.preventDefault(); exec('insertText', txt);
+});
 
 /* ---------- Recibir cosas compartidas desde otras apps ----------
    El manifest declara Libreta como destino al compartir (Android).
@@ -872,7 +1185,9 @@ $('#shBody').addEventListener('click', e => {
     const title = $('#shTitleIn').value.trim();
     // Si el título lo has cambiado tú, se añade también como encabezado
     const add = (title && title !== n.title && !title.startsWith('Enlace de ') ? title + '\n' : '') + shared.body;
-    patch(n.id, { body: n.body ? n.body.replace(/\s+$/, '') + '\n\n' + add : add });
+    const p = { body: n.body ? n.body.replace(/\s+$/, '') + '\n\n' + add : add };
+    if (n.html) p.html = n.html + '<div><br></div>' + textToHtml(add).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>');
+    patch(n.id, p);
     shared = null; history.back();
     if (n.list === 'ideas') setTimeout(() => goPage(1), 350);
     toast('Añadido a «' + (n.title || 'la nota').slice(0, 30) + '»');
